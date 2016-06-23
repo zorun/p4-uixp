@@ -25,7 +25,7 @@ action _drop() {
     drop();
 }
 
-action _nop() {
+action allowed_mac() {
 }
 
 /* Table associating MAC addresses and port, dropping packets with
@@ -36,7 +36,7 @@ table validate_src_mac {
         standard_metadata.ingress_port: exact;
     }
     actions {
-        _nop;
+        allowed_mac;
         _drop;
     }
     size: 1024;
@@ -46,14 +46,18 @@ action nd_reply(target_mac) {
     /* Hard part: take a NS packet and reply with a suitable NA
        packet.  To do that, we just modify the NS packet in place and
        send it back to where it came from. */
-  // TODO: handle multicast/unicast cases
+    // TODO: handle multicast/unicast cases
     modify_field(ipv6.srcAddr, ipv6.dstAddr);
     modify_field(ipv6.dstAddr, ipv6.srcAddr);
+    // TODO: change MAC addresses
     add_header(icmpv6_na);
     modify_field(icmpv6_na.router, 1);
     modify_field(icmpv6_na.solicited, 1);
     modify_field(icmpv6_na.override, 1);
     modify_field(icmpv6_na.targetAddr, icmpv6_ns.targetAddr);
+    modify_field(icmpv6_na.LLoptType, 2);
+    modify_field(icmpv6_na.LLoptLength, 1);
+    modify_field(icmpv6_na.LLoptValue, target_mac);
     remove_header(icmpv6_ns);
     /* Send back the packet to where it came from. */
     modify_field(standard_metadata.egress_spec, standard_metadata.ingress_port);
@@ -89,17 +93,22 @@ table switch_frame {
 }
 
 control ingress {
-    /* TODO: start by determining whether this is multicast or not
-       (based on MAC address) → metadata */
-    apply(validate_src_mac);
-    if (is_nd()) {
-        apply(ipv6_neighbours);
-    }
-    /* This could go in a table */
-    else if (is_multicast()) {
-        drop();
-    }
-    else {
-        apply(switch_frame);
+    apply(validate_src_mac) {
+        allowed_mac {
+            if (valid(icmpv6_ns)) {
+                apply(ipv6_neighbours);
+            }
+            else if (ethernet_pkt_type.multicast != 1) {
+                apply(switch_frame);
+	    }
+        }
     }
 }
+
+/*
+Local variables:
+eval:   (c-mode)
+eval:   (setq c-basic-offset 4)
+eval:   (c-set-offset 'label 4)
+End:
+*/

@@ -6,6 +6,14 @@ header_type ethernet_t {
     }
 }
 
+/* Metadata */
+header_type ethernet_pkt_type_t {
+    fields {
+        unicast : 1;
+        multicast : 1; // This includes broadcast
+    }
+}
+
 header_type ipv6_t {
     fields {
         version : 4;
@@ -21,7 +29,8 @@ header_type ipv6_t {
 
 header_type icmpv6_t {
     fields {
-        type: 8;
+        /* "type" is a reserved token */
+        type_: 8;
         code: 8;
         hdrChecksum: 16;
     }
@@ -94,3 +103,11 @@ header_type icmp_t {
         hdrChecksum : 16;
     }
 }
+
+/*
+Local variables:
+eval:   (c-mode)
+eval:   (setq c-basic-offset 4)
+eval:   (c-set-offset 'label 4)
+End:
+*/

@@ -15,9 +15,14 @@ parser start {
 }
 
 header ethernet_t ethernet;
+metadata ethernet_pkt_type_t ethernet_pkt_type;
 
 parser parse_ethernet {
     extract(ethernet);
+    //select(latest.dstAddr) {
+    //  0 mask 0x010000000000: set_metadata(ethernet_pkt_type.unicast, 1);
+    // 1 mask 0x010000000000: set_metadata(ethernet_pkt_type.multicast, 1);
+    //};
     return select(latest.etherType) {
         ETHERTYPE_IPV6: parse_ipv6;
         //ETHERTYPE_ARP: parse_arp_rarp;
@@ -39,7 +44,7 @@ header icmpv6_t icmpv6;
 
 parser parse_icmpv6 {
     extract(icmpv6);
-    return select(latest.type) {
+    return select(latest.type_) {
         ICMPV6_TYPE_NS: parse_icmpv6_ns;
         ICMPV6_TYPE_NA: parse_icmpv6_na;
         default: ingress;
@@ -53,9 +58,17 @@ parser parse_icmpv6_ns {
     return ingress;
 }
 
-header icmpv6_ns_t icmpv6_na;
+header icmpv6_na_t icmpv6_na;
 
 parser parse_icmpv6_na {
     extract(icmpv6_na);
     return ingress;
 }
+
+/*
+Local variables:
+eval:   (c-mode)
+eval:   (setq c-basic-offset 4)
+eval:   (c-set-offset 'label 4)
+End:
+*/
