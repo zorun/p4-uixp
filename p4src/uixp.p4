@@ -59,10 +59,12 @@ action nd_reply(target_mac) {
     /* Hard part: take a NS packet and reply with a suitable NA
        packet.  To do that, we just modify the NS packet in place and
        send it back to where it came from. */
-    // TODO: handle multicast/unicast cases
-    modify_field(ipv6.srcAddr, ipv6.dstAddr);
+    // TODO: handle case where srcAddr is ::
     modify_field(ipv6.dstAddr, ipv6.srcAddr);
-    // TODO: change MAC addresses
+    modify_field(ipv6.srcAddr, icmpv6_ns.targetAddr);
+    modify_field(ethernet.dstAddr, ethernet.srcAddr);
+    modify_field(ethernet.srcAddr, target_mac);
+    modify_field(icmpv6.type_, ICMPV6_TYPE_NA);
     add_header(icmpv6_na);
     modify_field(icmpv6_na.router, 1);
     modify_field(icmpv6_na.solicited, 1);
@@ -71,6 +73,7 @@ action nd_reply(target_mac) {
     modify_field(icmpv6_na.LLoptType, 2);
     modify_field(icmpv6_na.LLoptLength, 1);
     modify_field(icmpv6_na.LLoptValue, target_mac);
+    /* TODO: this will leave NS options in the packet... */
     remove_header(icmpv6_ns);
     /* Send back the packet to where it came from. */
     modify_field(standard_metadata.egress_spec, standard_metadata.ingress_port);
