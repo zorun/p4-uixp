@@ -6,14 +6,6 @@ header_type ethernet_t {
     }
 }
 
-/* Metadata */
-header_type ethernet_pkt_type_t {
-    fields {
-        unicast : 1;
-        multicast : 1; // This includes broadcast
-    }
-}
-
 header_type ipv6_t {
     fields {
         version : 4;

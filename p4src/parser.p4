@@ -15,14 +15,9 @@ parser start {
 }
 
 header ethernet_t ethernet;
-metadata ethernet_pkt_type_t ethernet_pkt_type;
 
 parser parse_ethernet {
     extract(ethernet);
-    //select(latest.dstAddr) {
-    //  0 mask 0x010000000000: set_metadata(ethernet_pkt_type.unicast, 1);
-    // 1 mask 0x010000000000: set_metadata(ethernet_pkt_type.multicast, 1);
-    //};
     return select(latest.etherType) {
         ETHERTYPE_IPV6: parse_ipv6;
         //ETHERTYPE_ARP: parse_arp_rarp;

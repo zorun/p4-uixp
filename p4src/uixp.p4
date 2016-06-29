@@ -42,6 +42,19 @@ table validate_src_mac {
     size: 1024;
 }
 
+/* Table listing allowed MAC addresses on egress.  The main usage is
+   to drop all multicast/broadcast frames. */
+table validate_dest_mac {
+    reads {
+        ethernet.dstAddr: ternary;
+    }
+    actions {
+        allowed_mac;
+        _drop;
+    }
+    size: 1024;
+}
+
 action nd_reply(target_mac) {
     /* Hard part: take a NS packet and reply with a suitable NA
        packet.  To do that, we just modify the NS packet in place and
@@ -98,11 +111,15 @@ control ingress {
             if (valid(icmpv6_ns)) {
                 apply(ipv6_neighbours);
             }
-            else if (ethernet_pkt_type.multicast != 1) {
+            else {
                 apply(switch_frame);
 	    }
         }
     }
+}
+
+control egress {
+    apply(validate_dest_mac);
 }
 
 /*
