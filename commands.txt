@@ -1,0 +1,14 @@
+#table_set_default validate_src_mac _drop
+# For now, allow all source MAC
+table_set_default validate_src_mac allowed_mac
+;
+#table_set_default validate_dest_mac _drop
+#table_add validate_dest_mac allowed_mac 0 mask 01:00:00:00:00:00
+# For now, allow all destination MAC
+table_set_default validate_dest_mac allowed_mac
+;
+table_set_default ipv6_neighbours _drop
+table_add ipv6_neighbours nd_reply fe80::897:aff:fedd:4e77 => 0a:97:0a:dd:4e:77
+;
+table_set_default switch_frame _drop
+table_add switch_frame send_to_port 0a:97:0a:dd:4e:77 => 1
