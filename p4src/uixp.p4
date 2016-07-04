@@ -70,11 +70,15 @@ action nd_reply(target_mac) {
     modify_field(icmpv6_na.solicited, 1);
     modify_field(icmpv6_na.override, 1);
     modify_field(icmpv6_na.targetAddr, icmpv6_ns.targetAddr);
-    modify_field(icmpv6_na.LLoptType, 2);
-    modify_field(icmpv6_na.LLoptLength, 1);
-    modify_field(icmpv6_na.LLoptValue, target_mac);
-    /* TODO: this will leave NS options in the packet... */
+    add_header(nd_option_tgt_ll_addr);
+    modify_field(nd_option_tgt_ll_addr.type_, ICMPV6_ND_OPTION_TARGET_LL_ADDR);
+    modify_field(nd_option_tgt_ll_addr.length_, 1);
+    modify_field(nd_option_tgt_ll_addr.ll_addr, target_mac);
+    /* Remove NS header and all its options. */
     remove_header(icmpv6_ns);
+    remove_header(nd_option_src_ll_addr);
+    remove_header(nd_option_unknown);
+    /* TODO: do we need to fixup the length in the IPv6 header? */
     /* Send back the packet to where it came from. */
     modify_field(standard_metadata.egress_spec, standard_metadata.ingress_port);
 }

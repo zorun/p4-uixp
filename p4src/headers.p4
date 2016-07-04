@@ -24,7 +24,7 @@ header_type icmpv6_t {
         /* "type" is a reserved token */
         type_: 8;
         code: 8;
-        hdrChecksum: 16;
+        checksum: 16;
     }
 }
 
@@ -33,7 +33,6 @@ header_type icmpv6_ns_t {
     fields {
         reserved: 32;
         targetAddr: 128;
-        /* For simplicity, we don't implement the "Source link-layer address" option */
     }
 }
 
@@ -44,12 +43,32 @@ header_type icmpv6_na_t {
         override: 1;
         reserved: 29;
         targetAddr: 128;
-        /* We hardcode one possible option, the "Target link-layer address" for Ethernet */
-        LLoptType: 8;
-        LLoptLength: 8;
-        LLoptValue: 48;
     }
 }
+
+/* Options for ICMPv6 Neighbour Discovery packets */
+
+/* This covers both "Source Link-layer Address" and "Target Link-layer
+   Address", restricted to the specific case of Ethernet to avoid
+   variable-length header. */
+header_type nd_option_ether_addr_t {
+    fields {
+        type_: 8;
+        length_: 8;
+        ll_addr: 64;
+    }
+}
+
+header_type nd_option_unknown_t {
+    fields {
+        type_: 8;
+        length_: 8;
+        value: *;
+    }
+    length: length_;
+    max_length: 64;
+}
+
 
 header_type arp_rarp_t {
     fields {
