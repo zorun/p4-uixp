@@ -73,7 +73,10 @@ field_list_calculation icmpv6_checksum {
 
 calculated_field icmpv6.checksum  {
     verify icmpv6_checksum;
-    update icmpv6_checksum;
+    /* P4 is only supposed to recompute checksums if we change the
+       packet, but for some reason, without the condition, P4 messes up
+       with the checksums of *all* ICMPv6 packets. */
+    update icmpv6_checksum if (valid(icmpv6_na));
 }
 
 
