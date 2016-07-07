@@ -55,11 +55,18 @@ parser parse_ipv6 {
 }
 
 field_list icmpv6_checksum_list {
+    /* IPv6 pseudo-header, see https://tools.ietf.org/html/rfc2460#section-8.1 */
     ipv6.srcAddr;
     ipv6.dstAddr;
     ipv6.payloadLen;
     24'0;
     ipv6.nextHdr;
+    /* ICMPv6 header */
+    icmpv6.type_;
+    icmpv6.code;
+    /* Checksum field, replaced by zeroes */
+    16'0;
+    /* ICMPv6 message */
     payload;
 }
 
@@ -73,10 +80,7 @@ field_list_calculation icmpv6_checksum {
 
 calculated_field icmpv6.checksum  {
     verify icmpv6_checksum;
-    /* P4 is only supposed to recompute checksums if we change the
-       packet, but for some reason, without the condition, P4 messes up
-       with the checksums of *all* ICMPv6 packets. */
-    update icmpv6_checksum if (valid(icmpv6_na));
+    update icmpv6_checksum;
 }
 
 
