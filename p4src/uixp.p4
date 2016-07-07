@@ -78,6 +78,8 @@ action nd_reply(target_mac) {
     remove_header(icmpv6_ns);
     remove_header(nd_option_src_ll_addr);
     remove_header(nd_option_unknown);
+    /* Zero out checksum, so that the new checksum computation is correct. */
+    modify_field(icmpv6.checksum, 0);
     /* TODO: do we need to fixup the length in the IPv6 header? */
     /* Send back the packet to where it came from. */
     modify_field(standard_metadata.egress_spec, standard_metadata.ingress_port);

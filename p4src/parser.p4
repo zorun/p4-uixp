@@ -58,11 +58,8 @@ field_list icmpv6_checksum_list {
     ipv6.srcAddr;
     ipv6.dstAddr;
     ipv6.payloadLen;
-    // zero??
+    24'0;
     ipv6.nextHdr;
-    icmpv6.type_;
-    icmpv6.code;
-    icmpv6.checksum;
     payload;
 }
 
