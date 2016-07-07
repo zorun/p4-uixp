@@ -55,7 +55,10 @@ header_type nd_option_ether_addr_t {
     fields {
         type_: 8;
         length_: 8;
-        ll_addr: 64;
+        /* This is supposed to be 64 bits, since the length is in
+           units of 8 octets: https://tools.ietf.org/html/rfc4861#section-4.6.1
+           However, Linux only transmits 48 bits... */
+        ll_addr: 48;
     }
 }
 

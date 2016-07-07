@@ -118,14 +118,14 @@ parser parse_icmpv6_na {
 parser parse_source_ll_addr {
     extract(nd_option_src_ll_addr);
     set_metadata(my_metadata.parse_icmpv6_counter,
-                 my_metadata.parse_icmpv6_counter - 10);
+                 my_metadata.parse_icmpv6_counter - 8);
     return parse_nd_options;
 }
 
 parser parse_target_ll_addr {
     extract(nd_option_tgt_ll_addr);
     set_metadata(my_metadata.parse_icmpv6_counter,
-                 my_metadata.parse_icmpv6_counter - 10);
+                 my_metadata.parse_icmpv6_counter - 8);
     return parse_nd_options;
 }
 
